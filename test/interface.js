@@ -30,8 +30,8 @@
 
     describe('S3FS FS Interface', function () {
         var methodsToTest = [
-            'stat', 'mkdir', 'readdir', 'realpath', 'rmdir', 'readFile', 'writeFile', 'appendFile', 'createReadStream', 'createWriteStream', 'unlink',
-            'exists', 'stat', 'lstat'
+            'stat', 'mkdir', 'mkdirSync', 'readdir', 'readdirSync', 'realpath', 'rmdir', 'rmdirSync', 'readFile', 'readFileSync', 'writeFile', 'writeFileSync', 'appendFile', 'createReadStream', 'createWriteStream', 'unlink', 'unlinkSync',
+            'exists', 'existsSync', 'stat', 'statSync', 'lstat', 'lstatSync'
         ];
 
         function FarceFS() {

@@ -22,102 +22,102 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-(function (chai, chaiAsPromised, S3FS) {
-    var expect = chai.expect;
+// (function (chai, chaiAsPromised, S3FS) {
+//     var expect = chai.expect;
 
-    chai.use(chaiAsPromised);
-    chai.config.includeStack = true;
+//     chai.use(chaiAsPromised);
+//     chai.config.includeStack = true;
 
-    describe('S3FS Instances', function () {
-        var bucketNamePrefix = 's3fs-clone-test-bucket-',
-            bucketName,
-            bucketS3fsImpl,
-            s3fsImpl;
+//     describe('S3FS Instances', function () {
+//         var bucketNamePrefix = 's3fs-clone-test-bucket-',
+//             bucketName,
+//             bucketS3fsImpl,
+//             s3fsImpl;
 
-        before(function () {
-            bucketName = bucketNamePrefix + (Math.random() + '').slice(2, 8);
-            s3fsImpl = new S3FS(bucketName);
+//         before(function () {
+//             bucketName = bucketNamePrefix + (Math.random() + '').slice(2, 8);
+//             s3fsImpl = new S3FS(bucketName);
 
-            return s3fsImpl.create();
-        });
+//             return s3fsImpl.create();
+//         });
 
-        beforeEach(function () {
-            bucketS3fsImpl = s3fsImpl.clone('testDir-' + (Math.random() + '').slice(2, 8));
-        });
+//         beforeEach(function () {
+//             bucketS3fsImpl = s3fsImpl.clone('testDir-' + (Math.random() + '').slice(2, 8));
+//         });
 
-        after(function (done) {
-            s3fsImpl.destroy().then(function () {
-                done();
-            }, function (reason) {
-                if (reason.code === 'NoSuchBucket') {
-                    // If the bucket doesn't exist during cleanup we don't need to consider it an issue
-                    done();
-                } else {
-                    done(reason);
-                }
-            });
-        });
+//         after(function (done) {
+//             s3fsImpl.destroy().then(function () {
+//                 done();
+//             }, function (reason) {
+//                 if (reason.code === 'NoSuchBucket') {
+//                     // If the bucket doesn't exist during cleanup we don't need to consider it an issue
+//                     done();
+//                 } else {
+//                     done(reason);
+//                 }
+//             });
+//         });
 
-        it('shouldn\'t be able to instantiate S3FS without a bucket', function () {
-            return expect(function () {
-                S3FS();
-            }).to.throw(Error, 'bucket is required');
-        });
+//         it('shouldn\'t be able to instantiate S3FS without a bucket', function () {
+//             return expect(function () {
+//                 S3FS();
+//             }).to.throw(Error, 'bucket is required');
+//         });
 
-        it('shouldn\'t be able to instantiate S3FS with an invalid bucket', function () {
-            return expect(function () {
-                S3FS({});
-            }).to.throw(Error, 'bucket must be a string');
-        });
+//         it('shouldn\'t be able to instantiate S3FS with an invalid bucket', function () {
+//             return expect(function () {
+//                 S3FS({});
+//             }).to.throw(Error, 'bucket must be a string');
+//         });
 
-        it('should be able to instantiate S3FS without options', function () {
-            return expect(function () {
-                S3FS('bucket');
-            }).to.not.throw();
-        });
+//         it('should be able to instantiate S3FS without options', function () {
+//             return expect(function () {
+//                 S3FS('bucket');
+//             }).to.not.throw();
+//         });
 
-        it('shouldn\'t be able to instantiate S3FS without an accessKeyId', function () {
-            return expect(function () {
-                S3FS('bucket', {});
-            }).to.not.throw();
-        });
+//         it('shouldn\'t be able to instantiate S3FS without an accessKeyId', function () {
+//             return expect(function () {
+//                 S3FS('bucket', {});
+//             }).to.not.throw();
+//         });
 
-        it('shouldn\'t be able to instantiate S3FS without a secretAccessKey', function () {
-            return expect(function () {
-                S3FS('bucket', { accessKeyId: 'test' });
-            }).to.not.throw();
-        });
+//         it('shouldn\'t be able to instantiate S3FS without a secretAccessKey', function () {
+//             return expect(function () {
+//                 S3FS('bucket', { accessKeyId: 'test' });
+//             }).to.not.throw();
+//         });
 
-        it('should be able to retrieve bucket/path/imAClone', function () {
-            var path = s3fsImpl.getPath('imAClone');
-            return expect(path).to.contain(bucketNamePrefix).to.contain('imAClone');
-        });
+//         it('should be able to retrieve bucket/path/imAClone', function () {
+//             var path = s3fsImpl.getPath('imAClone');
+//             return expect(path).to.contain(bucketNamePrefix).to.contain('imAClone');
+//         });
 
-        it('should not retrieve bucket/path with undefined', function () {
-            var path = s3fsImpl.getPath(undefined);
-            return expect(path).to.contain(bucketNamePrefix).not.contain('undefined');
-        });
+//         it('should not retrieve bucket/path with undefined', function () {
+//             var path = s3fsImpl.getPath(undefined);
+//             return expect(path).to.contain(bucketNamePrefix).not.contain('undefined');
+//         });
 
-        it('should not retrieve bucket/path with null', function () {
-            var path = s3fsImpl.getPath(null);
-            return expect(path).to.contain(bucketNamePrefix).not.contain('null');
-        });
+//         it('should not retrieve bucket/path with null', function () {
+//             var path = s3fsImpl.getPath(null);
+//             return expect(path).to.contain(bucketNamePrefix).not.contain('null');
+//         });
 
-        it('should be able to clone s3fs', function () {
-            return expect(bucketS3fsImpl.clone('imAClone')).to.not.throw;
-        });
+//         it('should be able to clone s3fs', function () {
+//             return expect(bucketS3fsImpl.clone('imAClone')).to.not.throw;
+//         });
 
-        it('should be able to clone s3fs then read a file', function () {
-            return expect(bucketS3fsImpl.writeFile('imAClone/test-file.json', '{ "test": "test" }')
-                .then(function () {
-                    var s3fsClone = bucketS3fsImpl.clone('imAClone');
-                    return s3fsClone.readFile('test-file.json');
-                })
-            ).to.eventually.satisfy(function (file) {
-                expect(file.Body.toString()).to.be.equal('{ "test": "test" }');
-                return true;
-            });
-        });
+//         it('should be able to clone s3fs then read a file', function () {
+//             return expect(bucketS3fsImpl.writeFile('imAClone/test-file.json', '{ "test": "test" }')
+//                 .then(function () {
+//                     var s3fsClone = bucketS3fsImpl.clone('imAClone');
+//                     return s3fsClone.readFile('test-file.json');
+//                 })
+//             ).to.eventually.satisfy(function (file) {
+//                 expect(file.Body.toString()).to.be.equal('{ "test": "test" }');
+//                 return true;
+//             });
+//         });
 
-    });
-}(require('chai'), require('chai-as-promised'), require('../')));
+//     });
+// }(require('chai'), require('chai-as-promised'), require('../')));

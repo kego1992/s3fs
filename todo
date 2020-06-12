@@ -1,0 +1,4 @@
+1. Remove bucket related ops
+2. Make call closer to fs interface
+3. Fix skipped test cases
+4. Update test cases and improve coverage

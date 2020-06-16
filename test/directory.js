@@ -30,7 +30,7 @@
     chai.config.includeStack = true;
 
     describe('Directories', function () {
-        var rootPath = 'test'
+        var rootPath = process.env.TEST_BUCKET || 'test';
         var mainTestFolder = 'directory-tests'
         var bucketName = `${rootPath}/${mainTestFolder}`,
             bucketS3fsImpl,
@@ -43,119 +43,6 @@
         after(async function () {
             this.timeout(100000);
             await new S3FS(rootPath).rmdirp(mainTestFolder);
-        });
-        
-        describe('sync', function () {
-            beforeEach(function () {
-                bucketS3fsImpl = s3fsImpl.clone('sync-tstDir-e' + (Math.random() + '').slice(2, 8));
-            });
-
-            it('should be able to create a directory', function () {
-                bucketS3fsImpl.mkdirSync('testDir');
-            });
-
-            it('should be able to create a directory when going up a directory', function () {
-                bucketS3fsImpl.clone('testDir').mkdirSync('../testDir/../testDir/testDir2/')
-            });
-
-            it.skip('should be able to tell that a directory exists', function () {
-                //TODO: Fix this so that it actually works on sub-directories.
-                expect(bucketS3fsImpl.exists('/')).to.equal(true);
-            });
-
-            it.skip('should be able to tell that a directory exists when going up a directory', function () {
-                //TODO: Fix this so that it actually works on sub-directories.
-                bucketS3fsImpl.mkdirSync('/testDir')
-                var testDirS3fsImpl = bucketS3fsImpl.clone('testDir')
-                expect(testDirS3fsImpl.exists('../testDir/../testDir/')).to.equal(true);
-            });
-
-            it.skip('should be able to tell that a sub-directory exists', function () {
-                //TODO: Fix this so that it actually works on sub-directories.
-                bucketS3fsImpl.mkdirSync('testDir')
-                expect(bucketS3fsImpl.exists('testDir/')).to.equal(true);
-            });
-
-            it('should be able to remove an empty directory', function () {
-                bucketS3fsImpl.mkdirSync('testDir');
-                let resp = bucketS3fsImpl.rmdirSync('testDir');
-                expect(bucketS3fsImpl.readdirSync('/')).to.have.lengthOf(0);
-            });
-
-            it('should be able to remove an empty directory by going up a directory', function () {
-                bucketS3fsImpl.mkdirSync('testDir')
-                var testDirS3fsImpl = bucketS3fsImpl.clone('testDir');
-                testDirS3fsImpl.rmdirSync('../testDir/../testDir/');
-                expect(bucketS3fsImpl.readdirSync('/')).to.have.lengthOf(0);
-            });
-
-            // it('should be able to remove a non-empty directory', function () {
-            //     bucketS3fsImpl.mkdirSync('testDir')
-            //     bucketS3fsImpl.writeFileSync('testDir/test.json', '{}');
-            //     let resp = bucketS3fsImpl.rmdirSync('testDir')
-            //     console.log(bucketS3fsImpl.path, resp)
-            //     expect(bucketS3fsImpl.readdirSync('/')).to.have.lengthOf(0);
-            // });
-
-
-            it.skip('should be able to list all files in a big directory ', function () {
-                var contents = '{}';
-                const fileNames = [];
-                for (var i = 0, il = 110; i < il; i++) {
-                    fileNames.push(`test_${i}.json`);
-                }
-                fileNames.forEach(fileName => bucketS3fsImpl.writeFileSync(`testBigDir/${fileName}`, contents));
-                let files = bucketS3fsImpl.readdirSync('testBigDir/')
-                expect(files).to.deep.equal(fileNames.sort());
-            });
-
-            it('should retrieve the stats of a directory - stat(2)', function () {
-                bucketS3fsImpl.mkdirSync('testDir/')
-                let stats = bucketS3fsImpl.statSync('testDir/');
-                expect(stats.isDirectory()).to.be.true();
-            });
-
-            it('should retrieve the stats of a directory when going up a directory - stat(2)', function () {
-                bucketS3fsImpl.mkdirSync('testDir/')
-                var testDirS3fsImpl = bucketS3fsImpl.clone('testDir');
-                let stats = testDirS3fsImpl.statSync('../testDir/../testDir/');
-                expect(stats.isDirectory()).to.be.true();
-
-            });
-
-            it('should retrieve the stats of a directory - lstat(2)', function () {
-                bucketS3fsImpl.mkdirSync('testDir/')
-                let stats = bucketS3fsImpl.lstatSync('testDir/');
-                expect(stats.isDirectory()).to.be.true();
-            });
-
-            it('should retrieve the stats of a directory when going up a directory - lstat(2)', function () {
-                bucketS3fsImpl.mkdirSync('testDir/')
-                var testDirS3fsImpl = bucketS3fsImpl.clone('testDir');
-                let stats = testDirS3fsImpl.lstatSync('../testDir/../testDir/');
-                expect(stats.isDirectory()).to.be.true();
-            });
-
-            it('should list all the files in a directory', function () {
-                bucketS3fsImpl.mkdirSync('testDir/')
-                bucketS3fsImpl.writeFileSync('testDir/test.json', '{}')
-                bucketS3fsImpl.writeFileSync('testDir/test/test.json', '{}');
-                let files = bucketS3fsImpl.readdirSync('testDir/')
-                expect(files).to.have.lengthOf(2);
-                expect(files[0]).to.equal('test.json');
-                expect(files[1]).to.equal('test/');
-            });
-
-            it('should list all the files in a directory when going up a directory', function () {
-                bucketS3fsImpl.mkdirSync('testDir/')
-                bucketS3fsImpl.writeFileSync('testDir/test.json', '{}')
-                bucketS3fsImpl.writeFileSync('testDir/test/test.json', '{}');
-                var testDirS3fsImpl = bucketS3fsImpl.clone('testDir');
-                let files = testDirS3fsImpl.readdirSync('../testDir/../testDir/')
-                expect(files).to.have.lengthOf(2);
-                expect(files[0]).to.equal('test.json');
-                expect(files[1]).to.equal('test/');
-            });
         });
 
         describe ('async', function () {
